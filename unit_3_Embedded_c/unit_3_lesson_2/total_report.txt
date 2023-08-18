@@ -1,0 +1,288 @@
+ $ arm-none-eabi-objdump.exe -h startup.o                                        ***                            startup.s
+                                              						   ***          .global reset
+startup.o:     file format elf32-littlearm                                       ***          reset:
+                                              						   ***                  ldr SP, =Stack_top
+Sections:                                                                        ***                  bl main
+Idx Name          Size      VMA       LMA       File off  Algn                   ***                  stop: b stop
+  0 .text         00000010  00000000  00000000  00000034  2**2                   ***
+                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE                   ***
+  1 .data         00000000  00000000  00000000  00000044  2**0                   ***
+                  CONTENTS, ALLOC, LOAD, DATA                                    ***
+  2 .bss          00000000  00000000  00000000  00000044  2**0                   ***
+                  ALLOC                                                          ***
+  3 .ARM.attributes 00000014  00000000  00000000  00000044  2**0                 ***
+                  CONTENTS, READONLY
+
+// comment :- 
+
+-> only text section exists which is clear from assembly code & its size = 0x10 = 16 bytes
+
+// reading symbols of startup.o :-
+
+$ arm-none-eabi-nm.exe startup.o
+         U main
+00000000 T reset
+         U Stack_top
+00000008 t stop
+
+// comment :- 
+
+-> both main & stack_top are undefined symbols so they havnt even relocatable memory locations but no error will occur at this phase till linker role is on which will resolve these undifened symbols and assign real physical memory locations to each symbol
+
+ -> values beside reset & stop are not real but virtual memory locations that will be assigned to thier real location in the next phase by linker according to linker script 
+
+// contents of startup.o 
+
+arm-none-eabi-objdump.exe -s startup.o
+
+startup.o:     file format elf32-littlearm
+
+Contents of section .text:
+ 0000 04d09fe5 feffffeb feffffea 00000000  ................
+Contents of section .ARM.attributes:
+ 0000 41130000 00616561 62690001 09000000  A....aeabi......
+ 0010 06010801                             ....
+
+
+********************************************************************************************************************************************************************************************
+$ arm-none-eabi-objdump.exe -h app.o                                                        				APP.C
+
+app.o:     file format elf32-littlearm                                        ***               #include "uart.h"
+Sections:												***               unsigned*char name []="Learn-in-depth >>> Ahmed Nabil";           
+Idx Name          Size      VMA       LMA       File off  Algn                ***         	char bss[100];
+  0 .text         00000018  00000000  00000000  00000034  2**2                ***          	const char rod_variable = 'T';
+                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE                ***		      void  main(void)
+  1 .data         00000020  00000000  00000000  0000004c  2**2 			***              {
+                  CONTENTS, ALLOC, LOAD, DATA 			 			***                 uart_send_string(name);
+  2 .bss          00000000  00000000  00000000  0000006c  2**0 			***
+                  ALLOC                                        			***               }
+  3 .rodata       00000001  00000000  00000000  0000006c  2**0 			***
+                  CONTENTS, ALLOC, LOAD, READONLY, DATA        			***
+  4 .comment      00000012  00000000  00000000  0000006d  2**0 			***
+                  CONTENTS, READONLY 			 			      ***
+  5 .ARM.attributes 00000032  00000000  00000000  0000007f  2**0 			***
+                  CONTENTS, READONLY										           
+ 
+// comment :-
+
+-> size of .text section in app.o which indicates the size of c code instruction = 0x18 which is equivalent to 24 bytes.
+
+-> size of .data section in app.o which indicates the size of golbal/static initialized  = 0x20 which is equivalent to 32 bytes which make sense cause there's only 1 global initalized data section which the array of char name which length is 30 char + 1 null char + 1 extra byte due to padding effect.
+
+-> although char array bss exists unintialize and it should be in located in .bss section but .bss section has no exist in load location but it will appear at runtime and attached to it's real physical memory address which will be decleared later by linker script.
+
+-> size of .ro data = 1 byte which make sense cause there is only one global const intialized of type char whose size = 1 byte 
+
+-> vma & lma of all sections have the same values 0x00000000 cause at these phase of code there's no informations about memory locations exist so zeros here indicates a virtual memory locations that will be relocated later at the phase of linking according to linker script.
+
+// reading symbols of app.o :- 
+ 
+$ arm-none-eabi-nm.exe app.o
+00000064 C bss
+00000000 T main										
+00000000 D name
+00000000 R rod_variable
+         U uart_send_string
+
+-> this binary utility gives information about the size of .bss only which here is 0x64 equivalent to 100 byte which is the real size of the variable bss
+
+-> main : .text sec -- name : .data rod_variable : rod 
+
+-> uart_send_string have no value cause it's undefined symbol it just decleared here and will defined later by linker 
+
+
+// app.o contents :-
+
+$ arm-none-eabi-objdump.exe -s app.o
+
+app.o:     file format elf32-littlearm
+
+Contents of section .text:
+ 0000 00482de9 04b08de2 04009fe5 feffffeb  .H-.............
+ 0010 0088bde8 00000000                    ........
+Contents of section .data:
+ 0000 4c656172 6e2d696e 2d646570 7468203e  Learn-in-depth >
+ 0010 3e3e2041 686d6564 204e6162 696c0000  >> Ahmed Nabil..
+Contents of section .rodata:
+ 0000 54                                   T                             // ascii code of T 
+Contents of section .comment:
+ 0000 00474343 3a202847 4e552920 342e372e  .GCC: (GNU) 4.7.
+ 0010 3200                                 2.
+Contents of section .ARM.attributes:
+ 0000 41310000 00616561 62690001 27000000  A1...aeabi..'...
+ 0010 0541524d 39323645 4a2d5300 06050801  .ARM926EJ-S.....
+ 0020 09011204 14011501 17031801 19011a01  ................
+ 0030 1e06                                 ..
+
+********************************************************************************************************************************************************************************************
+                                                                                                 
+$ arm-none-eabi-objdump.exe -h uart.o								***                 uart.c
+														***
+uart.o:     file format elf32-littlearm								***			#include "uart.h"
+														***   	      #define DATAREG *((volatile unsigned int*const)((unsigned int*)0x101f1000))
+Sections:													***               void uart_send_string(unsigned char*str)
+Idx Name          Size      VMA       LMA       File off  Algn				***               {
+  0 .text         00000050  00000000  00000000  00000034  2**2				***                while (*str != '\0')
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE					***               {
+  1 .data         00000000  00000000  00000000  00000084  2**0				***                     DATAREG = (unsigned int)(*str);
+                  CONTENTS, ALLOC, LOAD, DATA							***                     str++;
+  2 .bss          00000000  00000000  00000000  00000084  2**0				***                }
+                  ALLOC											***                
+  3 .comment      00000012  00000000  00000000  00000084  2**0				***                }
+                  CONTENTS, READONLY								***
+  4 .ARM.attributes 00000032  00000000  00000000  00000096  2**0				***
+                  CONTENTS, READONLY                       				      ***
+
+-> size of .text sections exist in uart.o = 0x50 which is equaivalent to 80 bytes
+
+-> all other sections equates zero cause as clear uart.c conatins nothing excepts  c code instructions 
+
+// reading symbols of uart.o :- 
+
+$ arm-none-eabi-nm.exe uart.o
+00000000 T uart_send_string
+
+-> only one symbol which represent function address that will be located later according to linker script 
+
+// uart.o contents
+ 
+$ arm-none-eabi-objdump.exe -s uart.o
+
+uart.o:     file format elf32-littlearm
+
+Contents of section .text:
+ 0000 04b02de5 00b08de2 0cd04de2 08000be5  ..-.......M.....
+ 0010 060000ea 30309fe5 08201be5 0020d2e5  ....00... ... ..
+ 0020 002083e5 08301be5 013083e2 08300be5  . ...0...0...0..
+ 0030 08301be5 0030d3e5 000053e3 f4ffff1a  .0...0....S.....
+ 0040 00d08be2 0008bde8 1eff2fe1 00101f10  ........../.....
+Contents of section .comment:
+ 0000 00474343 3a202847 4e552920 342e372e  .GCC: (GNU) 4.7.
+ 0010 3200                                 2.
+Contents of section .ARM.attributes:
+ 0000 41310000 00616561 62690001 27000000  A1...aeabi..'...
+ 0010 0541524d 39323645 4a2d5300 06050801  .ARM926EJ-S.....
+ 0020 09011204 14011501 17031801 19011a01  ................
+ 0030 1e06                                 ..
+
+
+********************************************************************************************************************************************************************************************
+
+                                                                              LINKER_SCRIPT
+ENTRY(reset)
+
+MEMORY
+{
+   Mem (rwx) : ORIGIN = 0x00000000, LENGTH = 128M 
+
+}
+
+SECTIONS 
+{
+   . = 0x10000;
+   .reset . :
+{    
+    startup.o(.text)
+}> Mem
+ .text :
+{
+  *(.text)
+}> Mem
+.data:
+{
+   *(.data)
+}> Mem
+.bss:
+{
+  *(.bss)  *(COMMON)
+}> Mem
+.rodata:
+{
+*(.rodata)
+}> Mem
+ . = . + 0x10000;
+ Stack_top = .;
+}
+
+//COMMENT :- 
+
+-> line 1 indicates the label which will be located at the entery point of the processor which will be reset label which initalize the value of SP of as mentioned in startup.s.
+
+-> linker will decide there will only be 1 memory called Mem read/write/exec. starts at address 0x00000000 and its size is 128MB.
+
+-> . is memory location counter which we can use to assigin real physical values to labels as we want according to out target & specs and this counter is auto modified according to the size of each section so we set location counter = 0x10000 because from specs we find that Entry point of processor is at 0x10000 and then assign . value to reset section conatimg .text of startup.o which first instructoin is the label reset which initalize processor stack pointer to indicates the begin of stack in memory.
+
+-> at the end of partition of each section we add value of 0x10000 to location counter these will be the size of stack and then assign the value of . to Stack_top as shown which will be assigned to processor SP as written in startup.s in this line --> "ldr SP, =Stack_top" so linker will resolve stack_top symboland assign the value of . after end of all sections _0x10000 which will be the size of stack.
+
+********************************************************************************************************************************************************************************************
+                                                               analysis of .elf file after linking all together 
+
+arm-none-eabi-ld.exe -T linker_script.ld app.o uart.o startup.o -o Learn-in-depth.elf -Map=MAp_file.map
+$ arm-none-eabi-objdump.exe -h Learn-in-depth.elf                               
+Learn-in-depth.elf:     file format elf32-littlearm
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .reset        00000010  00010000  00010000  00008000  2**2
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  1 .text         00000068  00010010  00010010  00008010  2**2
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  2 .data         00000020  00010078  00010078  00008078  2**2
+                  CONTENTS, ALLOC, LOAD, DATA
+  3 .bss          00000064  00010098  00010098  00008098  2**2
+                  ALLOC
+  4 .rodata       00000001  000100fc  000100fc  000080fc  2**0
+                  CONTENTS, ALLOC, LOAD, READONLY, DATA
+  5 .ARM.attributes 0000002e  00000000  00000000  000080fd  2**0
+                  CONTENTS, READONLY
+  6 .comment      00000011  00000000  00000000  0000812b  2**0
+                  CONTENTS, READONLY
+// comment :- 
+
+-> for sections all vma = lma because here we define only one memory called Mem so load location will be same as runtime location.
+
+-> in reset section its size is 0x10 = 16 bytes which were the same size of .text sectoin in startup.o as decleared in the top of report which make sense but the most important note is that starting address of reset section is assigned to 0x00010000 which is the Entry point of processor here reset label in start up will locate at the entry point as planned so it will go initalize SP & then branch to main as scripted.
+
+-> since .reset section size is 0x10 bytes & it begins at adress 0x00010000 as shown so it make sense that the next section .text begins at address 0x10010 as clear.
+
+// reading symbols of elf file 
+arm-none-eabi-nm.exe Learn-in-depth.elf
+00010098 B bss
+00010010 T main
+00010078 D name
+00010000 T reset
+000100fc R rod_variable
+000200fd R Stack_top
+00010008 t stop
+00010028 T uart_send_string
+
+// comment :- 
+
+-> here all symbols are resolved and assigned to real physical memory adresses thanks to linker. 
+
+to make sure the entery point is assigned to its accurate place will use readelf binary utility
+
+ arm-none-eabi-readelf.exe -a Learn-in-depth.elf
+ELF Header:
+  Magic:   7f 45 4c 46 01 01 01 00 00 00 00 00 00 00 00 00
+  Class:                             ELF32
+  Data:                              2's complement, little endian
+  Version:                           1 (current)
+  OS/ABI:                            UNIX - System V
+  ABI Version:                       0
+  Type:                              EXEC (Executable file)
+  Machine:                           ARM
+  Version:                           0x1
+  Entry point address:               0x10000   <---------------
+
+********************************************************************************************************************************************************************************************
+       
+                                                                          finally create .bin file and excute 
+
+$ arm-none-eabi-objcopy.exe -O binary Learn-in-depth.elf Learn-in-depth.bin
+
+ qemu-system-arm -M versatilepb -m 256M -nographic -kernel Learn-in-depth.bin
+Learn-in-depth >>> Ahmed Nabil
+
+
+
