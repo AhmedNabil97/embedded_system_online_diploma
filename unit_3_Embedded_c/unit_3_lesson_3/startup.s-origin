@@ -1,0 +1,36 @@
+/* startup.s -> cortex-m3
+Eng : Ahmed Nabil 
+*/
+
+
+
+.section .vector
+
+.word 0x20002018        /* stack top address */
+.word _reset
+.word vector_handler    /* 2NMI */
+.word vector_handler    /* HARD FAULT */
+.word vector_handler    /* MM FAULT */
+.word vector_handler    /* BUS FAULT */
+.word vector_handler    /* USAGE FAULT */ 
+.word vector_handler    /* RESERVED */
+.word vector_handler    /* RESERVED */
+.word vector_handler    /* RESERVED */
+.word vector_handler    /* RESERVED */
+.word vector_handler    /* SB CALL */
+.word vector_handler    /* DEBUG RESERVED */ 
+.word vector_handler    /* RESERVED */
+.word vector_handler    /* PENDSV */
+.word vector_handler    /* SYSTEC 
+.word vector_handler    /* IRQ 0 */
+.word vector_handler    /* IRQ 1 */
+.word vector_handler    /* IRQ 2 */
+                        /* ... upto IRQ 67 */
+
+.section .text
+_reset:
+bl main
+b .
+.thumb_func
+vector_handler:
+b _reset
