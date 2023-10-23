@@ -1,0 +1,5 @@
+1 ahmed nabil 3.5 10 15 2 8 9
+1 mazen hesham 4 5 10 15 2 5
+3 omar mohamed 3.2 15 2 6 7 8
+4 walid anwar 3.8 10 8 4 5 2 
+5 marwan ayman 3.7 5 7 8 12 14
