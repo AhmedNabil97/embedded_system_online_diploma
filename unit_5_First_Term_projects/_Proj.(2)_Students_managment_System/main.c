@@ -12,10 +12,6 @@
 
 int main(void) {
     int choice;
-	queue_init();
-	printf("{{ Welcome to student Management system }}\n");
-	while(1)
-	{
 	void(*options[9])() =                                       //array of pointers to function
 	{
 			 add_student_manually,
@@ -28,7 +24,11 @@ int main(void) {
 			 up_s,
 			 show_s
 	};
-
+	queue_init();
+	printf("{{ Welcome to student Management system }}\n");
+	
+	while(1)	
+	{
 	printf("choose the task that u want to perform :- \n");
 	printf("1. add the students details manually. \n");
 	printf("2. add the students details from text file. \n");
