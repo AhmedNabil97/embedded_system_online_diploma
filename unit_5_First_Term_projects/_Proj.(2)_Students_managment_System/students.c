@@ -1,8 +1,8 @@
 /*
  * students.c
  *
- *  Created on: ??þ/??þ/????
- *      Author: lenovo
+ *  Created on: 23/10/2023
+ *      Author: ahmed nabil
  */
 
 #include "students.h"
@@ -182,6 +182,7 @@ void add_student_manually()
 
 
 }
+
 void find_rl()
 {
 	if(fifo_status_t == fifo_empty)         // check if list is empty
@@ -218,6 +219,7 @@ void find_rl()
 	printf("----------------------------------------\n");
 
 }
+
 void find_fn()
 {
 	if(fifo_status_t == fifo_empty)         // check if list is empty
@@ -294,6 +296,7 @@ void find_c()
 }
 
 void tot_s()
+
 {
 	if(fifo_status_t == fifo_empty)         // check if list is empty
 	{
@@ -307,6 +310,7 @@ void tot_s()
 
 
 }
+
 void del_s()
 {
 	if(fifo_status_t == fifo_empty)         // check if list is empty
@@ -350,6 +354,7 @@ void del_s()
 	printf("----------------------------------------\n");
 
 }
+
 void up_s()
 {
 	if(fifo_status_t == fifo_empty)         // check if list is empty
