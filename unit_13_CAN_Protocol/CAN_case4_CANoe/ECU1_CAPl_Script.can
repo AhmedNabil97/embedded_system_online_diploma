@@ -1,0 +1,28 @@
+/*@!Encoding:65001*/
+includes
+{
+  
+}
+
+variables
+{
+  msTimer acc_timer;
+  const int ACC_Delay = 1000;
+  message ACC_Ctrl_Msg Acc_Com;
+  int variable_acc = 0;
+}
+
+on start
+{
+  setTimer (acc_timer,ACC_Delay);
+}
+
+on timer acc_timer
+{
+  variable_acc = @sysvar::ACC_SYS_VAL ;
+  Acc_Com.ACC_Command.phys = variable_acc;
+  write ("Eng. : Ahmed Nabil ----> CAN Network");
+  output(Acc_Com); 
+  setTimer (acc_timer,ACC_Delay);
+
+}

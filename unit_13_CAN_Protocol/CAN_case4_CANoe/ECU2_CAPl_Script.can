@@ -1,0 +1,41 @@
+/*@!Encoding:65001*/
+includes
+{
+  
+}
+
+variables
+{
+  message Speed_Val_Msg speed_send; 
+  int speed_var = 0;
+}
+
+on start
+{
+  
+  write("Welcome to Eng. : Ahmed Nabil CAN Network");
+}
+
+on message ACC_Ctrl_Msg
+{
+  if(this.ACC_Command.phys == 1)
+  {
+    if(speed_var == 220)
+      speed_var = 220;
+    else if(speed_var + 10 > 220)
+      speed_var = 220;
+    else
+    speed_var += 10;
+  }
+  else
+  {
+    if(speed_var == 0)
+      speed_var = 0 ;
+    else if(speed_var - 10 < 0)
+      speed_var = 0;
+    else
+    speed_var -= 10 ;
+  }
+  speed_send.Speed_Value.phys = speed_var;
+  output(speed_send);
+}
