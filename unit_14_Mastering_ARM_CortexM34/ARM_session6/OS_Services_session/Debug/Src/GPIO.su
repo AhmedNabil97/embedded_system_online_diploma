@@ -1,0 +1,12 @@
+GPIO.c:12:9:get_position	16	static
+GPIO.c:55:6:reset_mode_cfn	16	static
+GPIO.c:69:6:MCAL_GPIO_Init	32	static
+GPIO.c:177:6:MCAL_GPIO_DeInit	16	static
+GPIO.c:224:9:MCAL_GPIO_Read_Pin	16	static
+GPIO.c:242:10:MCAL_GPIO_Read_Port	16	static
+GPIO.c:260:6:MCAL_GPIO_Write_Pin	16	static
+GPIO.c:281:6:MCAL_GPIO_Write_Port	16	static
+GPIO.c:295:6:MCAL_GPIO_Toggle_Pin	16	static
+GPIO.c:308:6:MCAL_GPIO_Toggle_Port	16	static
+GPIO.c:322:9:MCAL_GPIO_lock_Pin	24	static
+GPIO.c:342:9:MCAL_GPIO_lock_Port	24	static
